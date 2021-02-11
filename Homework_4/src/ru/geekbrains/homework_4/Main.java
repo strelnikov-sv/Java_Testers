@@ -12,6 +12,30 @@ package ru.geekbrains.homework_4;
     Консоль использовать только для вывода результатов проверки телефонного справочника.
  */
 
-public class Main {
+import java.util.*;
 
+public class Main {
+    public static void main(String[] args) {
+        ArrayList<String> words = new ArrayList<>(Arrays.asList(
+                "Привет!", "Я", "Учусь", "На", "Тестировщика", "И", "Сейчас", "Я", "Изучаю", "Java",
+                "Java", "-", "Очень", "Популярный", "Язык", "Программирования", "У", "Тестировщика"));
+
+        Map<String, Integer> map = new HashMap<>();
+        for (String word : words) {
+            map.put(word, Collections.frequency(words, word));
+        }
+
+        System.out.println(map + "\n");
+        System.out.println(map.keySet() + "\n");
+
+
+        PhoneBook phonebook = new PhoneBook();
+        phonebook.add("Якубович", "+19119957412");
+        phonebook.add("Стрельников", "+29111234567");
+        phonebook.add("Стрельников", "+39951234567");
+        phonebook.add("Ермаков", "+49161113325");
+        phonebook.add("Задорнов", "+59501230202");
+
+        System.out.println("Все телефонные номера по фамилии Стрельников " + phonebook.get("Стрельников"));
+    }
 }
