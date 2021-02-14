@@ -21,8 +21,15 @@ private int[][] data;
 }
  */
 
-public class Main {
-    public static void main(String[] args){
+import java.io.IOException;
 
+public class Main {
+    public static void main(String[] args) throws IOException {
+        String[] header = {"Value1", "Value2", "Value3"};
+        int[][] data = {{100,400,123},{300,400,500}};
+        AppData appData = new AppData(header, data);
+        MyCSV.writeCSV("./file.csv", appData,",");
+        AppData appData1 = (MyCSV.readCSV("./file.csv", ","));
+        System.out.println(appData1);
     }
 }
