@@ -5,6 +5,12 @@ package ru.geekbrains.homework_6;
 пересекающийся со следующим занятием (например, выборка погода на следующие 5 дней - подойдет)
  */
 
-public class Main {
+import java.io.IOException;
 
+public class Main {
+    public static void main(String[] args) throws IOException {
+
+        System.out.println(WeatherDataSource.getWeatherInCity("Санкт-Петербург"));
+
+    }
 }
