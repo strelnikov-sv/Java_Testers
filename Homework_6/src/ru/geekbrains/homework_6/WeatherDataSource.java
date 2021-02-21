@@ -1,15 +1,23 @@
 package ru.geekbrains.homework_6;
 
-// This is a personal academic project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
-
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import okhttp3.*;
 
 import java.io.IOException;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class WeatherDataSource {
+public final class WeatherDataSource {
+
+    private static final String API_KEY = ApplicationGlobalState.getInstance().getApiKey();
 
     private static final String LOCATION_URL_BASE = "dataservice.accuweather.com";
     private static final String LOCATION = "locations";
@@ -20,10 +28,13 @@ public class WeatherDataSource {
     private static final String FORECAST = "forecasts";
     private static final String FORECAST_TYPE = "daily";
     private static final String FORECAST_PERIOD = "5day";
-
-    private static final String API_KEY = "lQw0RxZD0yCYFZALzl0pgyJt9UypSBHN";
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     private static final OkHttpClient client = new OkHttpClient();
+
+    private WeatherDataSource() {
+        throw new IllegalStateException("WeatherDataSource");
+    }
 
     private static ResponseBody validateResponse(Response response) throws IOException {
         ResponseBody responseBody = response.body();
@@ -72,7 +83,7 @@ public class WeatherDataSource {
         }
     }
 
-    public static String getWeather(String location_code) throws IOException {
+    public static List<WeatherResponse> getWeather5D(String location_code) throws IOException {
         HttpUrl url = new HttpUrl.Builder()
                 .scheme("http")
                 .host(FORECAST_URL_BASE)
@@ -94,10 +105,25 @@ public class WeatherDataSource {
         Response response = client.newCall(requesthttp).execute();
         ResponseBody responseBody = validateResponse(response);
 
-        return responseBody.string();
+        String jsonBody = responseBody.string();
+
+        JsonNode dailyForecasts = objectMapper.readTree(jsonBody).at("/DailyForecasts");
+        List<WeatherResponse> responses = new ArrayList<>();
+        for (JsonNode resp : dailyForecasts) {
+            Long datestamp = Long.parseLong(resp.at("/EpochDate").asText());
+            String date = Instant.ofEpochSecond(datestamp).atZone(ZoneId.systemDefault()).toLocalDate().format(
+                    DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL)
+                            .withLocale(new Locale("ru"))
+            );
+            String temperatureMinValue = resp.at("/Temperature/Minimum/Value").asText();
+            String temperatureMaxValue = resp.at("/Temperature/Maximum/Value").asText();
+            String weatherCondition = resp.at("/Day/IconPhrase").asText();
+            responses.add(new WeatherResponse(date, temperatureMinValue, temperatureMaxValue, weatherCondition));
+        }
+        return responses;
     }
 
-    public static String getWeatherInCity(String city) throws IOException {
-                return getWeather(encodeCity(city));
+    public static List<WeatherResponse> getWeatherInCity(String city) throws IOException {
+        return getWeather5D(encodeCity(city));
     }
 }
