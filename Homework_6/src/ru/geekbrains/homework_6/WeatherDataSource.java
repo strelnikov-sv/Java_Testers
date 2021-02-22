@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import okhttp3.*;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -14,6 +15,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static java.lang.Long.parseLong;
 
 public final class WeatherDataSource {
 
@@ -83,7 +86,7 @@ public final class WeatherDataSource {
         }
     }
 
-    public static List<WeatherResponse> getWeather5D(String location_code) throws IOException {
+    public static List<WeatherResponse> getWeather5D(String location_code) throws IOException, SQLException {
         HttpUrl url = new HttpUrl.Builder()
                 .scheme("http")
                 .host(FORECAST_URL_BASE)
@@ -108,22 +111,22 @@ public final class WeatherDataSource {
         String jsonBody = responseBody.string();
 
         JsonNode dailyForecasts = objectMapper.readTree(jsonBody).at("/DailyForecasts");
+
         List<WeatherResponse> responses = new ArrayList<>();
+        DatabaseRepositorySQLiteImpl databaseRepository = new DatabaseRepositorySQLiteImpl();
         for (JsonNode resp : dailyForecasts) {
-            Long datestamp = Long.parseLong(resp.at("/EpochDate").asText());
-            String date = Instant.ofEpochSecond(datestamp).atZone(ZoneId.systemDefault()).toLocalDate().format(
-                    DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL)
-                            .withLocale(new Locale("ru"))
-            );
-            String temperatureMinValue = resp.at("/Temperature/Minimum/Value").asText();
-            String temperatureMaxValue = resp.at("/Temperature/Maximum/Value").asText();
+            Instant datestamp = Instant.ofEpochSecond(parseLong(resp.at("/EpochDate").asText()));
+            Integer temperatureMinValue = resp.at("/Temperature/Minimum/Value").asInt();
+            Integer temperatureMaxValue = resp.at("/Temperature/Maximum/Value").asInt();
             String weatherCondition = resp.at("/Day/IconPhrase").asText();
-            responses.add(new WeatherResponse(date, temperatureMinValue, temperatureMaxValue, weatherCondition));
+            WeatherResponse weatherResponse = new  WeatherResponse(datestamp, temperatureMinValue, temperatureMaxValue, weatherCondition);
+            databaseRepository.saveWeatherData(weatherResponse);
+            responses.add(weatherResponse);
         }
         return responses;
     }
 
-    public static List<WeatherResponse> getWeatherInCity(String city) throws IOException {
+    public static List<WeatherResponse> getWeatherInCity(String city) throws IOException, SQLException {
         return getWeather5D(encodeCity(city));
     }
 }

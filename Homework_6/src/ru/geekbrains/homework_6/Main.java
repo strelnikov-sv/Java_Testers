@@ -1,25 +1,28 @@
 package ru.geekbrains.homework_6;
 
 /*
-    Реализовать интерфейс общения с пользователем в консоли в формате:
-    Назовите город: Выберите опцию:
-    -получить погоду на 5 дней
-    -выход
-    В городе CITY на дату DATE ожидается WEATHER_TEXT, температура - TEMPERATURE - 1 день
-    В городе CITY на дату DATE ожидается WEATHER_TEXT, температура - TEMPERATURE - 2 день
-    В городе CITY на дату DATE ожидается WEATHER_TEXT, температура - TEMPERATURE - 3 день
-    В городе CITY на дату DATE ожидается WEATHER_TEXT, температура - TEMPERATURE - 4 день
-    В городе CITY на дату DATE ожидается WEATHER_TEXT, температура - TEMPERATURE - 5 день
-    repeat
-
-    Информацию из запросов сериализовать в объект WeatherResponse date weatherText Temperature
-    Информацию для сообщения брать из созданного объекта.
+Добавить поддержку SQLite в проект
+Создать класс-репозиторий, отвечающий за взаимодействие с базой данных
+Организовать запись данных в базу при каждом успешном API запросе.
+Формат - String city, String localDate, String weatherText, Double temperature
+Организовать чтение из базы всех данных по пункту меню (требует переработки меню)
+Учесть, что соединение всегда нужно закрывать
+Сдать задание ПУЛРЕКВЕСТ + файл с базой данных .db
  */
+
+import java.sql.SQLException;
 
 public class Main {
 
     public static void main(String[] args) {
+        DatabaseRepositorySQLiteImpl databaseRepository = new DatabaseRepositorySQLiteImpl();
+        databaseRepository.createTableIfNotExists();
         UserInterface userInterface = new UserInterface();
-        userInterface.runApplication();
+        try{
+            userInterface.runApplication();
+            databaseRepository.getConnection().close();
+        } catch (SQLException e){
+            System.out.println("SQLException");
+        }
     }
 }

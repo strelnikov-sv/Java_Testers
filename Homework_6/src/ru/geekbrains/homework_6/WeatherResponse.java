@@ -1,17 +1,22 @@
 package ru.geekbrains.homework_6;
 
 import java.io.Serializable;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
+import java.util.Locale;
 
 public class WeatherResponse implements Serializable {
-    private String datestamp;
-    private String temperatureMinValue;
-    private String temperatureMaxValue;
+    private Instant datestamp;
+    private Integer temperatureMinValue;
+    private Integer temperatureMaxValue;
     private String weatherCondition;
 
     public WeatherResponse(
-            String datestamp,
-            String temperatureMinValue,
-            String temperatureMaxValue,
+            Instant datestamp,
+            Integer temperatureMinValue,
+            Integer temperatureMaxValue,
             String weatherCondition) {
         this.datestamp = datestamp;
         this.temperatureMinValue = temperatureMinValue;
@@ -21,33 +26,40 @@ public class WeatherResponse implements Serializable {
 
     @Override
     public String toString() {
-        return "Дата: " + datestamp +
+        return "Дата: " + humanReadableDate(datestamp) +
                 ", МинТемп: " + temperatureMinValue +
                 ", МаксТемп: " + temperatureMaxValue +
                 ", Условия: " + weatherCondition;
     }
 
-    public String getDatestamp() {
+    static String humanReadableDate(Instant datestamp){
+        return (datestamp).atZone(ZoneId.systemDefault()).toLocalDate().format(
+                DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL)
+                        .withLocale(new Locale("ru")));
+    }
+
+
+    public Instant getDatestamp() {
         return datestamp;
     }
 
-    public void setDatestamp(String datestamp) {
+    public void setDatestamp(Instant datestamp) {
         this.datestamp = datestamp;
     }
 
-    public String getTemperatureMaxValue() {
+    public Integer getTemperatureMaxValue() {
         return temperatureMaxValue;
     }
 
-    public void setTemperatureMaxValue(String temperatureMaxValue) {
+    public void setTemperatureMaxValue(Integer temperatureMaxValue) {
         this.temperatureMaxValue = temperatureMaxValue;
     }
 
-    public String getTemperatureMinValue() {
+    public Integer getTemperatureMinValue() {
         return temperatureMinValue;
     }
 
-    public void setTemperatureMinValue(String temperatureMinValue) {
+    public void setTemperatureMinValue(Integer temperatureMinValue) {
         this.temperatureMinValue = temperatureMinValue;
     }
 

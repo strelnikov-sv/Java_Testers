@@ -1,13 +1,14 @@
 package ru.geekbrains.homework_6;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.Scanner;
 
 public class UserInterface {
 
 	private final Controller controller = new Controller();
 
-	public void runApplication() {
+	public void runApplication() throws SQLException{
 		Scanner scanner = new Scanner(System.in);
 		while (true) {
 			System.out.println("Введите название города на русском или английском языке");
@@ -15,6 +16,7 @@ public class UserInterface {
 			setGlobalCity(city);
 
 			System.out.println("Введите ответ: 1 -  Получить погоду на следующие 5 дней, " +
+					"Введите ответ: 2 - Показать историю запросов, " +
 					"выход (exit) - завершить работу");
 			String result = scanner.nextLine();
 
@@ -57,7 +59,7 @@ public class UserInterface {
 		}
 	}
 
-	private void notifyController(String input) throws IOException {
+	private void notifyController(String input) throws IOException, SQLException {
 		controller.onUserInput(input);
 	}
 }

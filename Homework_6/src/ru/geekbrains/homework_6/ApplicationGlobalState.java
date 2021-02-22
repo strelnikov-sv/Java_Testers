@@ -2,6 +2,7 @@ package ru.geekbrains.homework_6;
 
 public final class ApplicationGlobalState {
     private static final String API_KEY = "lQw0RxZD0yCYFZALzl0pgyJt9UypSBHN";
+    private final String DB_FILENAME = "weather.db";
     private static ApplicationGlobalState INSTANCE;
     private String selectedCity;
 
@@ -19,6 +20,10 @@ public final class ApplicationGlobalState {
 
     public static String getApiKey() {
         return API_KEY;
+    }
+
+    public String getDbFileName() {
+        return DB_FILENAME;
     }
 
     public String getSelectedCity() {
